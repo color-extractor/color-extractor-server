@@ -10,5 +10,9 @@
   "bracketSameLine": false,
   "arrowParens": "always",
   "endOfLine": "lf",
-  "singleAttributePerLine": true
+  "singleAttributePerLine": true,
+  "importOrder": ["^@core/(.*)$", "^@server/(.*)$", "^@ui/(.*)$", "^[./]"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "plugins": ["@trivago/prettier-plugin-sort-imports"]
 }
