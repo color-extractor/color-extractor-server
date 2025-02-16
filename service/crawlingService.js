@@ -9,24 +9,57 @@ const getCrawling = async (req, res) => {
     const page = await browser.newPage();
     await page.goto(decodedUrl);
 
-    let htmlData = await page.$$eval("html", (elements) => {
-      return elements.map((e) => e.outerHTML);
+    let htmlData = await page.evaluate(() => {
+      const elements = document.body.querySelectorAll("*");
+
+      const objectArray = [...elements].map((element) => {
+        const allCssPropertiesOfElement = window.getComputedStyle(element);
+        const arr = [];
+
+        for (const propertyName in allCssPropertiesOfElement) {
+          const propertyValue =
+            allCssPropertiesOfElement.getPropertyValue(propertyName);
+          if (
+            propertyValue &&
+            (propertyName.includes("color") || propertyValue.includes("rgb"))
+          ) {
+            arr.push(propertyName + ": " + propertyValue);
+          }
+        }
+        return arr;
+      });
+      return objectArray;
     });
 
-    if (!htmlData) {
+    if (!htmlData || htmlData[0].elementTagName === "IFRAME") {
       await page.waitForSelector("iframe", { timeout: TIMEOUT });
 
       const iframeUrl = await page.$eval("iframe", (iframe) => iframe.src);
       await page.goto(iframeUrl);
 
-      const hasiframeUrlOfNaver = iframeUrl.startsWith(
-        "https://blog.naver.com"
-      );
-      htmlData = await page.$$eval("html", (elements) => {
-        return elements.map((e) => e.outerHTML);
+      htmlData = await page.evaluate(() => {
+        const elements = document.body.querySelectorAll("*");
+
+        const objectArray = [...elements].map((element) => {
+          const allCssPropertiesOfElement = window.getComputedStyle(element);
+          const arr = [];
+
+          for (const propertyName in allCssPropertiesOfElement) {
+            const propertyValue =
+              allCssPropertiesOfElement.getPropertyValue(propertyName);
+            if (
+              propertyValue &&
+              (propertyName.includes("color") || propertyValue.includes("rgb"))
+            ) {
+              arr.push(propertyName + ": " + propertyValue);
+            }
+          }
+          return arr;
+        });
+        return objectArray;
       });
 
-      if (!iframeUrl || !hasiframeUrlOfNaver) {
+      if (!iframeUrl) {
         throw new Error(`[Invalid iframe URL]`);
       }
     }
