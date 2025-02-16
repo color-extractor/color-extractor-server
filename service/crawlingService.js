@@ -66,7 +66,7 @@ const getCrawling = async (req, res) => {
 
     return res.status(200).json({
       url: req.params.url,
-      data: htmlData,
+      data: getNumericColor(htmlData),
     });
   } catch (error) {
     if (!isCheckTrueUrl(decodedUrl)) {
@@ -91,6 +91,24 @@ const isCheckTrueUrl = (url) => {
   } else {
     return false;
   }
+};
+
+const getNumericColor = (nestedArray) => {
+  const result = [];
+  nestedArray.forEach((rgbArray) => {
+    rgbArray.forEach((rgbText) => {
+      const rgbMatch = rgbText.match(/\((.*?)\)/g);
+
+      rgbMatch.forEach((rgbData) => {
+        const numberArray = rgbData.match(/\d+(\.\d+)?/g).map(Number);
+        if (numberArray.length === 4) {
+          numberArray.pop();
+        }
+        result.push(numberArray);
+      });
+    });
+  });
+  return result;
 };
 
 module.exports = { getCrawling };
