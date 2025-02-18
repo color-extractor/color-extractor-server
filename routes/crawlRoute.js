@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { getCrawling } = require("../service/crawlingService");
+const { getCrawling } = require("../services/crawlingService");
 
 const router = express.Router();
 
