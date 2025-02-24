@@ -10,6 +10,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "canvas": "^3.1.0",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
@@ -18,6 +19,7 @@
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
     "pug": "2.0.0-beta11",
+    "puppet-canvas": "^0.1.0",
     "puppeteer": "^24.2.0"
   },
   "devDependencies": {

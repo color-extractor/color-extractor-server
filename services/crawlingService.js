@@ -1,4 +1,5 @@
 const puppeteer = require("puppeteer");
+const { createCanvas, loadImage } = require("canvas");
 
 const getCrawling = async (req, res) => {
   const decodedUrl = decodeURIComponent(req.params.url);
@@ -9,9 +10,9 @@ const getCrawling = async (req, res) => {
     const page = await browser.newPage();
     await page.goto(decodedUrl);
 
-    let htmlData = await page.evaluate(() => {
+    let bodyData = await page.evaluate(() => {
       const elements = document.body.querySelectorAll("*");
-      const weightIterationCount = 2;
+      const weightIterationCount = 200;
 
       const getWeightedValueHtmlElement = (value) => {
         const filter = [
@@ -43,9 +44,6 @@ const getCrawling = async (req, res) => {
           arr.push("tagName: " + element.tagName);
         }
 
-        // arr.push("tagName: "+element.tagName);
-        // arr.push("className: "+element.className);
-        // arr.push("id: "+element.id);
         for (const propertyName in allCssPropertiesOfElement) {
           const propertyValue =
             allCssPropertiesOfElement.getPropertyValue(propertyName);
@@ -59,6 +57,9 @@ const getCrawling = async (req, res) => {
               propertyValue.includes("RGB") ||
               propertyValue.includes("!important"))
           ) {
+            if (propertyName.includes("border")) {
+              continue;
+            }
             if (getWeightedValueHtmlElement(element)) {
               for (let i = 0; i < weightIterationCount; i++) {
                 arr.push(propertyName + ": " + propertyValue);
@@ -72,15 +73,15 @@ const getCrawling = async (req, res) => {
       return objectArray;
     });
 
-    if (!htmlData || htmlData.flat()[0].includes("iframe")) {
+    if (!bodyData || bodyData.flat()[0].includes("iframe")) {
       await page.waitForSelector("iframe", { timeout: TIMEOUT });
 
       const iframeUrl = await page.$eval("iframe", (iframe) => iframe.src);
       await page.goto(iframeUrl);
 
-      htmlData = await page.evaluate(() => {
+      bodyData = await page.evaluate(() => {
         const elements = document.body.querySelectorAll("*");
-        const weightIterationCount = 2;
+        const weightIterationCount = 200;
 
         const getWeightedValueHtmlElement = (value) => {
           const filter = [
@@ -108,9 +109,6 @@ const getCrawling = async (req, res) => {
           const allCssPropertiesOfElement = window.getComputedStyle(element);
           const arr = [];
 
-          // arr.push("tagName: "+element.tagName);
-          // arr.push("className: "+element.className);
-          // arr.push("id: "+element.id);
           for (const propertyName in allCssPropertiesOfElement) {
             const propertyValue =
               allCssPropertiesOfElement.getPropertyValue(propertyName);
@@ -123,6 +121,9 @@ const getCrawling = async (req, res) => {
                 propertyValue.includes("RGB") ||
                 propertyValue.includes("!important"))
             ) {
+              if (propertyName.includes("border")) {
+                continue;
+              }
               if (getWeightedValueHtmlElement(element)) {
                 for (let i = 0; i < weightIterationCount; i++) {
                   arr.push(propertyName + ": " + propertyValue);
@@ -141,10 +142,21 @@ const getCrawling = async (req, res) => {
       }
     }
 
+    const faviconUrl = await getFaviconUrl(page);
+    const faviconArray = faviconUrl
+      ? (await getFaviconRgbData(faviconUrl)) || []
+      : [];
+
+    const cssRgbArray = convetTextToRgb(bodyData);
+    const cssAndFaviconRgbArray = [
+      ...faviconArray,
+      ...cssRgbArray,
+      ...faviconArray,
+    ];
+
     return res.status(200).json({
       url: req.params.url,
-      // data: htmlData,
-      data: getNumericColor(htmlData),
+      data: cssAndFaviconRgbArray,
     });
   } catch (error) {
     if (!isCheckTrueUrl(decodedUrl)) {
@@ -171,9 +183,9 @@ const isCheckTrueUrl = (url) => {
   }
 };
 
-const getNumericColor = (nestedArray) => {
+const convetTextToRgb = (nestedArray) => {
   const result = [];
-  nestedArray.forEach((rgbArray, idx) => {
+  nestedArray.forEach((rgbArray) => {
     rgbArray.forEach((rgbText) => {
       const rgbMatch = rgbText.match(/\((.*?)\)/g);
       rgbMatch.forEach((rgbData) => {
@@ -195,6 +207,41 @@ const getNumericColor = (nestedArray) => {
     });
   });
   return result;
+};
+
+const getFaviconUrl = async (page) => {
+  const faviconUrl = await page.evaluate(() => {
+    const favicons = document.querySelectorAll("link[rel*='icon']");
+
+    const faviconUrlArray = [...favicons].map((favicon) => {
+      if (favicon.href.includes(".png") || favicon.href.includes(".svg")) {
+        return favicon.href;
+      }
+    });
+    return faviconUrlArray.filter(Boolean)[0];
+  });
+
+  return faviconUrl;
+};
+
+const getFaviconRgbData = async (faviconUrl) => {
+  if (!faviconUrl) {
+    return null;
+  }
+
+  const image = await loadImage(faviconUrl);
+  const canvas = createCanvas(image.width, image.height);
+  const ctx = canvas.getContext("2d");
+
+  ctx.drawImage(image, 0, 0, image.width, image.height);
+  const imageData = ctx.getImageData(0, 0, image.width, image.height).data;
+
+  const rgbData = [];
+  for (let i = 0; i < imageData.length; i += 4) {
+    rgbData.push([imageData[i], imageData[i + 1], imageData[i + 2]]);
+  }
+
+  return rgbData;
 };
 
 module.exports = { getCrawling };
