@@ -11,6 +11,7 @@ const getCrawlingTitle = async (req, res) => {
       "--disable-gpu",
       "--disable-dev-shm-usage",
     ],
+    protocolTimeout: 120000,
   });
   try {
     const page = await browser.newPage();

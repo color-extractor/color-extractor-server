@@ -11,6 +11,7 @@ const getCrawlingKeyword = async (req, res) => {
       "--disable-gpu",
       "--disable-dev-shm-usage",
     ],
+    protocolTimeout: 120000,
   });
   const TIMEOUT = 20000;
 
