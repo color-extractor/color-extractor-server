@@ -3,8 +3,15 @@ const puppeteer = require("puppeteer");
 const getCrawlingTitle = async (req, res) => {
   const decodedLink = decodeURIComponent(req.params.url);
   const keyword = req.query.keyword;
-  const browser = await puppeteer.launch({ headless: true });
-
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+    ],
+  });
   try {
     const page = await browser.newPage();
     await page.goto(decodedLink);
