@@ -17,10 +17,12 @@
     "express": "~4.16.1",
     "globals": "^15.15.0",
     "http-errors": "~1.6.3",
+    "icojs": "^0.19.5",
     "morgan": "~1.9.1",
     "pug": "2.0.0-beta11",
     "puppet-canvas": "^0.1.0",
-    "puppeteer": "^24.2.0"
+    "puppeteer": "^24.2.0",
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",
