@@ -28,19 +28,7 @@ const getCrawling = async (req, res) => {
       };
 
       const getWeightedValueHtmlElement = (value) => {
-        const filter = [
-          "H1",
-          // "H2",
-          // "H3",
-          // "H4",
-          // "H5",
-          // "H6",
-          "HEADER",
-          "FOOTER",
-          "MAIN",
-          "NAV",
-          "ADDRESS",
-        ];
+        const filter = ["H1", "HEADER", "FOOTER", "MAIN", "NAV", "ADDRESS"];
         if (
           filter.includes(value.tagName.toUpperCase()) ||
           filter.includes(value.id.toString().toUpperCase())
@@ -113,19 +101,7 @@ const getCrawling = async (req, res) => {
         };
 
         const getWeightedValueHtmlElement = (value) => {
-          const filter = [
-            "H1",
-            // "H2",
-            // "H3",
-            // "H4",
-            // "H5",
-            // "H6",
-            "HEADER",
-            "FOOTER",
-            "MAIN",
-            "NAV",
-            "ADDRESS",
-          ];
+          const filter = ["H1", "HEADER", "FOOTER", "MAIN", "NAV", "ADDRESS"];
           if (
             filter.includes(value.tagName.toUpperCase()) ||
             filter.includes(value.id.toString().toUpperCase())
