@@ -2,7 +2,7 @@ const app = require("../server");
 const debug = require("debug")("color-extractor-server:server");
 const http = require("http");
 
-const port = normalizePort(process.env.PORT || "80");
+const port = normalizePort("80");
 app.set("port", port);
 
 const server = http.createServer(app);
