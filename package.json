@@ -16,6 +16,7 @@
     "express": "^4.21.2",
     "globals": "^15.15.0",
     "http-errors": "~1.6.3",
+    "icojs": "^0.19.5",
     "morgan": "~1.9.1",
     "pug": "^3.0.3",
     "pug-code-gen": "^3.0.3",

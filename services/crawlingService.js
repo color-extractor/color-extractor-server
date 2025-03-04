@@ -20,22 +20,23 @@ const getCrawling = async (req, res) => {
 
     let bodyData = await page.evaluate(() => {
       const elements = document.body.querySelectorAll("*");
-      const weightIterationCount = 200;
+      const weightIterationCount = 300;
+
+      const isInheritedColor = (element, propertyName) => {
+        if (!element.parentElement) {
+          return false;
+        }
+        const computedStyle = window.getComputedStyle(element);
+        const parentStyle = window.getComputedStyle(element.parentElement);
+
+        return (
+          computedStyle.getPropertyValue(propertyName) ===
+          parentStyle.getPropertyValue(propertyName)
+        );
+      };
 
       const getWeightedValueHtmlElement = (value) => {
-        const filter = [
-          "H1",
-          "H2",
-          "H3",
-          "H4",
-          "H5",
-          "H6",
-          "HEADER",
-          "FOOTER",
-          "MAIN",
-          "NAV",
-          "ADDRESS",
-        ];
+        const filter = ["H1", "HEADER", "FOOTER", "MAIN", "NAV", "ADDRESS"];
         if (
           filter.includes(value.tagName.toUpperCase()) ||
           filter.includes(value.id.toString().toUpperCase())
@@ -68,6 +69,9 @@ const getCrawling = async (req, res) => {
             if (propertyName.includes("border")) {
               continue;
             }
+            if (isInheritedColor(element, propertyName)) {
+              continue;
+            }
             if (getWeightedValueHtmlElement(element)) {
               for (let i = 0; i < weightIterationCount; i++) {
                 arr.push(propertyName + ": " + propertyValue);
@@ -89,22 +93,23 @@ const getCrawling = async (req, res) => {
 
       bodyData = await page.evaluate(() => {
         const elements = document.body.querySelectorAll("*");
-        const weightIterationCount = 200;
+        const weightIterationCount = 300;
+
+        const isInheritedColor = (element, propertyName) => {
+          if (!element.parentElement) {
+            return false;
+          }
+          const computedStyle = window.getComputedStyle(element);
+          const parentStyle = window.getComputedStyle(element.parentElement);
+
+          return (
+            computedStyle.getPropertyValue(propertyName) ===
+            parentStyle.getPropertyValue(propertyName)
+          );
+        };
 
         const getWeightedValueHtmlElement = (value) => {
-          const filter = [
-            "H1",
-            "H2",
-            "H3",
-            "H4",
-            "H5",
-            "H6",
-            "HEADER",
-            "FOOTER",
-            "MAIN",
-            "NAV",
-            "ADDRESS",
-          ];
+          const filter = ["H1", "HEADER", "FOOTER", "MAIN", "NAV", "ADDRESS"];
           if (
             filter.includes(value.tagName.toUpperCase()) ||
             filter.includes(value.id.toString().toUpperCase())
@@ -132,6 +137,9 @@ const getCrawling = async (req, res) => {
               if (propertyName.includes("border")) {
                 continue;
               }
+              if (isInheritedColor(element, propertyName)) {
+                continue;
+              }
               if (getWeightedValueHtmlElement(element)) {
                 for (let i = 0; i < weightIterationCount; i++) {
                   arr.push(propertyName + ": " + propertyValue);
@@ -157,6 +165,8 @@ const getCrawling = async (req, res) => {
 
     const cssRgbArray = convetTextToRgb(bodyData);
     const cssAndFaviconRgbArray = [
+      ...faviconArray,
+      ...cssRgbArray,
       ...faviconArray,
       ...cssRgbArray,
       ...faviconArray,
