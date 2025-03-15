@@ -18,12 +18,15 @@ const getCrawling = async (req, res) => {
         if (!element.parentElement) {
           return false;
         }
+
         const computedStyle = window.getComputedStyle(element);
         const parentStyle = window.getComputedStyle(element.parentElement);
 
+        const inlineStyle = element.style.getPropertyValue(propertyName);
+
         return (
           computedStyle.getPropertyValue(propertyName) ===
-          parentStyle.getPropertyValue(propertyName)
+            parentStyle.getPropertyValue(propertyName) && !inlineStyle
         );
       };
 
@@ -58,6 +61,14 @@ const getCrawling = async (req, res) => {
               propertyValue.includes("RGB") ||
               propertyValue.includes("!important"))
           ) {
+            if (
+              allCssPropertiesOfElement.getPropertyValue("display") ===
+                "none" ||
+              allCssPropertiesOfElement.getPropertyValue("visibility") ===
+                "hidden"
+            ) {
+              continue;
+            }
             if (propertyName.includes("border")) {
               continue;
             }
@@ -91,12 +102,15 @@ const getCrawling = async (req, res) => {
           if (!element.parentElement) {
             return false;
           }
+
           const computedStyle = window.getComputedStyle(element);
           const parentStyle = window.getComputedStyle(element.parentElement);
 
+          const inlineStyle = element.style.getPropertyValue(propertyName);
+
           return (
             computedStyle.getPropertyValue(propertyName) ===
-            parentStyle.getPropertyValue(propertyName)
+              parentStyle.getPropertyValue(propertyName) && !inlineStyle
           );
         };
 
@@ -126,6 +140,14 @@ const getCrawling = async (req, res) => {
                 propertyValue.includes("RGB") ||
                 propertyValue.includes("!important"))
             ) {
+              if (
+                allCssPropertiesOfElement.getPropertyValue("display") ===
+                  "none" ||
+                allCssPropertiesOfElement.getPropertyValue("visibility") ===
+                  "hidden"
+              ) {
+                continue;
+              }
               if (propertyName.includes("border")) {
                 continue;
               }
