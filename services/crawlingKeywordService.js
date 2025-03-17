@@ -3,16 +3,7 @@ const puppeteer = require("puppeteer");
 const getCrawlingKeyword = async (req, res) => {
   const decodedUrl = decodeURIComponent(req.params.url);
   const keyword = req.query.keyword;
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-gpu",
-      "--disable-dev-shm-usage",
-    ],
-    protocolTimeout: 120000,
-  });
+  const browser = await puppeteer.launch({ headless: true });
   const TIMEOUT = 20000;
 
   try {
@@ -22,8 +13,8 @@ const getCrawlingKeyword = async (req, res) => {
     let innerText = await page.evaluate(() => document.body.innerText);
     const upperCasedKeyword = keyword.toUpperCase();
     const hasKeyword = innerText.toUpperCase().includes(upperCasedKeyword);
-
-    const urlText = getAllSentence(innerText).find((sentence) =>
+    const allSentence = getAllSentence(innerText);
+    const urlText = allSentence.find((sentence) =>
       sentence.toUpperCase().includes(upperCasedKeyword)
     );
 
@@ -32,6 +23,7 @@ const getCrawlingKeyword = async (req, res) => {
         url: req.params.url,
         hasKeyword: hasKeyword,
         urlText: urlText,
+        urlAllText: allSentence,
       });
     } else if (!innerText) {
       await page.waitForSelector("iframe", { timeout: TIMEOUT });
@@ -50,8 +42,9 @@ const getCrawlingKeyword = async (req, res) => {
         .toUpperCase()
         .includes(upperCasedKeyword);
 
-      const urlText = getAllSentence(iframeInnerText).find((sentence) =>
-        sentence.includes(upperCasedKeyword)
+      const allSentence = getAllSentence(iframeInnerText);
+      const urlText = allSentence.find((sentence) =>
+        sentence.toUpperCase().includes(upperCasedKeyword)
       );
 
       if (!iframeUrl || !hasiframeUrlOfNaver) {
@@ -62,6 +55,7 @@ const getCrawlingKeyword = async (req, res) => {
           url: req.params.url,
           hasKeyword: hasKeywordOfIframe,
           urlText: urlText,
+          urlAllText: allSentence,
         });
       } else if (!hasKeywordOfIframe) {
         return res
